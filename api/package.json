@@ -1,11 +1,7 @@
 {
-  "name": "gotravel",
+  "name": "gotravel-api",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "build": "cd frontend-web && npm run build",
-    "vercel-build": "cd frontend-web && npm install && npm run build"
-  },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
     "bcryptjs": "^2.4.3",

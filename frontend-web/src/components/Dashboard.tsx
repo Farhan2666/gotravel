@@ -12,16 +12,16 @@ export default function Dashboard({ user, token, onStartBooking }: DashboardProp
   const [loadingBookings, setLoadingBookings] = useState(false);
 
   const promos = [
-    { code:'MUDIKSERU',    title:'Promo Mudik',          desc:'Diskon Rp 50.000 untuk perjalanan mudik.', expiry:'30 Jun 2026', gradient:'#F97316,#EF4444', tag:'ðŸ”¥ Panas' },
-    { code:'GAJIANHEBAT',  title:'Hemat Gajian',         desc:'Cashback 15% maks Rp 30.000 via Gopay.', expiry:'15 Jun 2026', gradient:'#3B82F6,#6366F1', tag:'ðŸ’° Cashback' },
-    { code:'LIBURANKILAT', title:'Liburan Weekend',      desc:'Potongan 10% rute Jakartaâ€“Bandung Sabtuâ€“Minggu.', expiry:'25 Jun 2026', gradient:'#10B981,#059669', tag:'ðŸŒ´ Weekend' },
+    { code:'MUDIKSERU',    title:'Promo Mudik',          desc:'Diskon Rp 50.000 untuk perjalanan mudik.', expiry:'30 Jun 2026', gradient:'#F97316,#EF4444', tag:'🔥 Panas' },
+    { code:'GAJIANHEBAT',  title:'Hemat Gajian',         desc:'Cashback 15% maks Rp 30.000 via Gopay.', expiry:'15 Jun 2026', gradient:'#3B82F6,#6366F1', tag:'💰 Cashback' },
+    { code:'LIBURANKILAT', title:'Liburan Weekend',      desc:'Potongan 10% rute Jakarta–Bandung Sabtu–Minggu.', expiry:'25 Jun 2026', gradient:'#10B981,#059669', tag:'🌴 Weekend' },
   ];
 
   const popularRoutes = [
-    { from:'Jakarta',   to:'Bandung',    price:'150k', time:'2j 30m', emoji:'ðŸ™ï¸' },
-    { from:'Jakarta',   to:'Semarang',   price:'350k', time:'6j',    emoji:'ðŸŒŠ' },
-    { from:'Bandung',   to:'Yogyakarta', price:'400k', time:'7j',    emoji:'ðŸ›ï¸' },
-    { from:'Yogyakarta',to:'Surabaya',   price:'280k', time:'5j',    emoji:'âš“' },
+    { from:'Jakarta',   to:'Bandung',    price:'150k', time:'2j 30m', emoji:'🏙️' },
+    { from:'Jakarta',   to:'Semarang',   price:'350k', time:'6j',    emoji:'🌊' },
+    { from:'Bandung',   to:'Yogyakarta', price:'400k', time:'7j',    emoji:'🏛️' },
+    { from:'Yogyakarta',to:'Surabaya',   price:'280k', time:'5j',    emoji:'⚓' },
   ];
 
   useEffect(() => { if (user && token) fetchMyBookings(); }, [user, token]);
@@ -44,7 +44,7 @@ export default function Dashboard({ user, token, onStartBooking }: DashboardProp
   return (
     <div className="pb-4">
 
-      {/* â”€â”€ HERO BANNER â”€â”€ */}
+      {/* ── HERO BANNER ── */}
       <div className="relative overflow-hidden mx-4 mt-4 rounded-2xl p-5" style={{ background:'linear-gradient(135deg, #1e3a5f 0%, #1a1f6e 100%)' }}>
         {/* decorative circles */}
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20" style={{ background:'radial-gradient(circle, #60a5fa, transparent)' }} />
@@ -56,7 +56,7 @@ export default function Dashboard({ user, token, onStartBooking }: DashboardProp
             Platform Travel Premium
           </div>
           <h1 className="text-2xl font-black text-white leading-tight">
-            {user ? `Halo, ${user.name.split(' ')[0]}! ðŸ‘‹` : 'Pergi Sekarang,\nLancar Sampai'}
+            {user ? `Halo, ${user.name.split(' ')[0]}! 👋` : 'Pergi Sekarang,\nLancar Sampai'}
           </h1>
           <p className="text-sm text-blue-200 leading-relaxed opacity-80">
             Pesan tiket travel antar kota, lacak perjalanan secara real-time.
@@ -68,7 +68,7 @@ export default function Dashboard({ user, token, onStartBooking }: DashboardProp
         </div>
       </div>
 
-      {/* â”€â”€ QUICK ROUTES â”€â”€ */}
+      {/* ── QUICK ROUTES ── */}
       <div className="mt-5 px-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold">Rute Populer</h2>
@@ -94,7 +94,7 @@ export default function Dashboard({ user, token, onStartBooking }: DashboardProp
         </div>
       </div>
 
-      {/* â”€â”€ MY BOOKINGS â”€â”€ */}
+      {/* ── MY BOOKINGS ── */}
       {user && (
         <div className="mt-5 px-4">
           <div className="flex items-center justify-between mb-3">
@@ -114,7 +114,7 @@ export default function Dashboard({ user, token, onStartBooking }: DashboardProp
               <Ticket className="w-8 h-8 mx-auto opacity-30" style={{ color:'var(--color-primary)' }} />
               <p className="text-sm font-semibold opacity-50">Belum ada tiket</p>
               <button onClick={onStartBooking} className="text-sm font-bold" style={{ color:'var(--color-primary)' }}>
-                Pesan sekarang â†’
+                Pesan sekarang →
               </button>
             </div>
           ) : (
@@ -128,8 +128,8 @@ export default function Dashboard({ user, token, onStartBooking }: DashboardProp
                         <MapPin className="w-5 h-5" style={{ color:'var(--color-primary)' }} />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-bold truncate">{b.route?.from} â†’ {b.route?.to}</p>
-                        <p className="text-xs opacity-50 truncate">{b.vehicleType} Â· Kursi {b.route?.waypoints?.join(', ') || '-'}</p>
+                        <p className="text-sm font-bold truncate">{b.route?.from} → {b.route?.to}</p>
+                        <p className="text-xs opacity-50 truncate">{b.vehicleType} · Kursi {b.route?.waypoints?.join(', ') || '-'}</p>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0 space-y-1">
@@ -144,7 +144,7 @@ export default function Dashboard({ user, token, onStartBooking }: DashboardProp
         </div>
       )}
 
-      {/* â”€â”€ PROMOS â”€â”€ */}
+      {/* ── PROMOS ── */}
       <div className="mt-5 px-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold flex items-center gap-2">
@@ -169,7 +169,7 @@ export default function Dashboard({ user, token, onStartBooking }: DashboardProp
                   style={{ color:'var(--color-primary)' }}
                   onClick={() => { navigator.clipboard.writeText(p.code); alert(`Kode "${p.code}" disalin!`); }}
                 >
-                  Salin Kode â†’
+                  Salin Kode →
                 </button>
               </div>
             </div>

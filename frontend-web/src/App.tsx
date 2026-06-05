@@ -52,7 +52,7 @@ export default function App() {
   return (
     <div className={`theme-${theme} theme-container`}>
 
-      {/* â”€â”€ HEADER â”€â”€ */}
+      {/* ── HEADER ── */}
       <header className="app-header px-4 py-3 flex items-center justify-between">
         <button onClick={() => setActiveTab('dashboard')} className="flex items-center gap-2 active:scale-95 transition-transform">
           <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-500/30">
@@ -95,7 +95,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* â”€â”€ MAIN â”€â”€ */}
+      {/* ── MAIN ── */}
       <main className="main-content" style={{ paddingBottom: isPassenger && user ? '80px' : '16px' }}>
         {isPassenger && (
           <>
@@ -117,7 +117,7 @@ export default function App() {
         {isAdmin  && <AdminPanel  token={token} user={user} />}
       </main>
 
-      {/* â”€â”€ BOTTOM NAV (Passengers only) â”€â”€ */}
+      {/* ── BOTTOM NAV (Passengers only) ── */}
       {isPassenger && user && (
         <nav className="bottom-nav">
           <div className="flex items-center justify-around px-2 py-2">

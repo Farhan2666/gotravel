@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Navigation, Radio, CheckCircle, BellRing, History } from 'lucide-react';
+import API from '../api';
 
 interface DriverPanelProps {
   token: string | null;
@@ -27,14 +28,14 @@ export default function DriverPanel({ token, user }: DriverPanelProps) {
     if (!token) return;
     try {
       // 1. Available orders
-      const resAvail = await fetch('http://localhost:5000/api/driver/available-bookings', {
+      const resAvail = await fetch(`${API}/driver/available-bookings`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const dataAvail = await resAvail.json();
       if (resAvail.ok) setAvailableOrders(dataAvail);
 
       // 2. Active orders
-      const resActive = await fetch('http://localhost:5000/api/driver/active-bookings', {
+      const resActive = await fetch(`${API}/driver/active-bookings`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const dataActive = await resActive.json();
@@ -58,7 +59,7 @@ export default function DriverPanel({ token, user }: DriverPanelProps) {
   const handleAcceptOrder = async (id: string) => {
     if (!token) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/bookings/${id}/accept`, {
+      const response = await fetch(`${API}/bookings/${id}/accept`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -80,7 +81,7 @@ export default function DriverPanel({ token, user }: DriverPanelProps) {
   const pushLocation = async (latitude: number, longitude: number) => {
     if (!token) return;
     try {
-      const response = await fetch('http://localhost:5000/api/driver/location', {
+      const response = await fetch(`${API}/driver/location`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

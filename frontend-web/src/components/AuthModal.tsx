@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, Car, Eye, EyeOff } from 'lucide-react';
+import API from '../api';
 
 interface AuthModalProps {
   isOpen: boolean; onClose: () => void;
@@ -24,7 +25,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     const endpoint = mode === 'login' ? 'login' : 'register';
     const body = mode === 'login' ? { email, password } : { name, email, password, role };
     try {
-      const res = await fetch(`http://localhost:5000/api/${endpoint}`, {
+      const res = await fetch(`${API}/${endpoint}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
       });
       const data = await res.json();

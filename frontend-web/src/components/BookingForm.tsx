@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Train, Calendar, Users, ArrowRight, ArrowLeftRight, Check, AlertCircle, ChevronLeft, Armchair, MapPin } from 'lucide-react';
+import API from '../api';
 
 interface BookingFormProps {
   token: string | null;
@@ -63,7 +64,7 @@ export default function BookingForm({ token, onBookingSuccess, onCancel }: Booki
     if (!token) { alert('Harap login terlebih dahulu.'); return; }
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/bookings', {
+      const res = await fetch(`${API}/bookings`, {
         method:'POST', headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
         body: JSON.stringify({ route:{ from:origin, to:destination, waypoints:passengers.map(p=>p.seat) }, vehicleType:`${selectedSchedule.name} (${selectedSchedule.class})`, price:selectedSchedule.price*passengerCount }),
       });

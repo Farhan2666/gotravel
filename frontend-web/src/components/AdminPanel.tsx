@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Ticket, Users, Layers, ShieldCheck, Database, Calendar } from 'lucide-react';
+import API from '../api';
 
 interface AdminPanelProps {
   token: string | null;
@@ -21,7 +22,7 @@ export default function AdminPanel({ token, user }: AdminPanelProps) {
     if (!token) return;
     try {
       // 1. Fetch Bookings
-      const resBookings = await fetch('http://localhost:5000/api/admin/bookings', {
+      const resBookings = await fetch(`${API}/admin/bookings`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const dataBookings = await resBookings.json();
@@ -30,7 +31,7 @@ export default function AdminPanel({ token, user }: AdminPanelProps) {
       }
 
       // 2. Fetch Transactions
-      const resTx = await fetch('http://localhost:5000/api/admin/transactions', {
+      const resTx = await fetch(`${API}/admin/transactions`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const dataTx = await resTx.json();

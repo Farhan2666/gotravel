@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, RotateCw, Navigation, ChevronLeft, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import API from '../api';
 
 interface LiveTrackingProps {
   token: string | null; bookingId: string | null;
@@ -14,7 +15,7 @@ export default function LiveTracking({ token, bookingId, onBackToDashboard }: Li
   const fetchTracking = async () => {
     if (!token || !bookingId) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/bookings/${bookingId}/track`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${API}/bookings/${bookingId}/track`, { headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) { setDriverInfo(await res.json()); setPingCount(c => c+1); }
     } catch {} finally { setLoading(false); }
   };

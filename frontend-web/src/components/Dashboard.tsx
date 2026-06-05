@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Compass, Tag, Ticket, ArrowRight, Clock, CheckCircle, XCircle, AlertCircle, ChevronRight, Zap, MapPin, Car } from 'lucide-react';
+import API from '../api';
 
 interface DashboardProps {
   user: any; token: string | null;
@@ -29,7 +30,7 @@ export default function Dashboard({ user, token, onStartBooking }: DashboardProp
     if (!token) return;
     setLoadingBookings(true);
     try {
-      const res = await fetch('http://localhost:5000/api/bookings/my', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${API}/bookings/my`, { headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) { const d = await res.json(); setMyBookings(d || []); }
     } catch {} finally { setLoadingBookings(false); }
   };

@@ -1,15 +1,10 @@
-import { Schema, model } from 'mongoose';
-
-const userSchema = new Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, enum: ['user', 'driver', 'admin'], default: 'user' },
-  membership: {
-    tier: { type: String, enum: ['none', 'silver', 'gold', 'platinum'], default: 'none' },
-    expiry: { type: Date, default: null }
-  },
-  createdAt: { type: Date, default: Date.now }
-});
-
-export const User = model('User', userSchema);
+export interface UserDocument {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: 'user' | 'driver' | 'admin';
+  membership_tier: 'none' | 'silver' | 'gold' | 'platinum';
+  membership_expiry: string | null;
+  created_at: string;
+}

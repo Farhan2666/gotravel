@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Train, Calendar, Users, ArrowRight, ArrowLeftRight, Check, AlertCircle, ChevronLeft, Armchair, MapPin } from 'lucide-react';
+import { Train, Bus, Calendar, Users, ArrowRight, ArrowLeftRight, Check, AlertCircle, ChevronLeft, Armchair, MapPin } from 'lucide-react';
 import API from '../api';
 
 interface BookingFormProps {
@@ -12,7 +12,6 @@ interface Passenger { name: string; nik: string; seat: string | null; }
 const CITIES = ['Jakarta', 'Bandung', 'Semarang', 'Yogyakarta', 'Surabaya', 'Malang', 'Denpasar'];
 const SEAT_LETTERS = ['A','B','C','D'];
 const TOTAL_ROWS = 6;
-const GERBONGS = ['Gerbong 1', 'Gerbong 2', 'Gerbong 3'];
 
 export default function BookingForm({ token, onBookingSuccess, onCancel }: BookingFormProps) {
   const [step, setStep] = useState(1);
@@ -25,14 +24,16 @@ export default function BookingForm({ token, onBookingSuccess, onCancel }: Booki
   const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
   const [passengers, setPassengers] = useState<Passenger[]>([{ name:'', nik:'', seat:null }]);
   const [activePassengerIdx, setActivePassengerIdx] = useState(0);
-  const [selectedGerbong, setSelectedGerbong] = useState(GERBONGS[0]);
   const [occupiedSeats, setOccupiedSeats] = useState<string[]>([]);
 
   useEffect(() => {
+    if (!selectedSchedule) return;
+    const layout = selectedSchedule.seat_layout || { rows: 6, columns: 4, labels: ['A','B','C','D'] };
+    const labels = layout.labels || ['A','B','C','D'];
     const occ: string[] = [];
-    for (const g of GERBONGS) for (let r=1; r<=TOTAL_ROWS; r++) for (const l of SEAT_LETTERS) if (Math.random()<0.35) occ.push(`${g}-${r}${l}`);
+    for (let r=1; r<=layout.rows; r++) for (const l of labels) if (Math.random()<0.35) occ.push(`${r}${l}`);
     setOccupiedSeats(occ);
-  }, []);
+  }, [selectedSchedule]);
 
   useEffect(() => {
     setPassengers(Array.from({ length:passengerCount }, ()=>({ name:'', nik:'', seat:null })));
@@ -41,15 +42,23 @@ export default function BookingForm({ token, onBookingSuccess, onCancel }: Booki
 
   const swapCities = () => { setOrigin(destination); setDestination(origin); };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (origin === destination) { alert('Kota asal dan tujuan tidak boleh sama!'); return; }
-    const basePrice = origin==='Jakarta' && destination==='Bandung' ? 150000 : origin==='Bandung' && destination==='Yogyakarta' ? 400000 : 200000;
-    setSchedules([
-      { id:'SCH_001', name:'GOtravel Express',     class:'Eksekutif',      departure:'08:30', arrival:'11:00', duration:'2j 30m', price:basePrice,     seatsLeft:12 },
-      { id:'SCH_002', name:'GOtravel VIP',          class:'Super Luxury',   departure:'14:15', arrival:'17:00', duration:'2j 45m', price:basePrice*1.5, seatsLeft:4  },
-      { id:'SCH_003', name:'GOtravel Ekonomi',      class:'Ekonomi Plus',   departure:'18:00', arrival:'20:45', duration:'2j 45m', price:basePrice*0.7, seatsLeft:32 },
-    ]);
-    setStep(2);
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/vehicles?from=${origin}&to=${destination}`);
+      const data = await res.json();
+      if (res.ok) {
+        setSchedules(data);
+        setStep(2);
+      } else {
+        alert(data.error || 'Gagal mencari kendaraan');
+      }
+    } catch {
+      alert('Tidak bisa terhubung ke server.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSelectSchedule = (s: any) => { setSelectedSchedule(s); setStep(3); };
@@ -66,7 +75,7 @@ export default function BookingForm({ token, onBookingSuccess, onCancel }: Booki
     try {
       const res = await fetch(`${API}/bookings`, {
         method:'POST', headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
-        body: JSON.stringify({ route:{ from:origin, to:destination, waypoints:passengers.map(p=>p.seat) }, vehicleType:`${selectedSchedule.name} (${selectedSchedule.class})`, price:selectedSchedule.price*passengerCount }),
+        body: JSON.stringify({ route:{ from:origin, to:destination, waypoints:passengers.map(p=>p.seat) }, vehicleType:selectedSchedule.name, vehicleId:selectedSchedule._id, price:selectedSchedule.price*passengerCount }),
       });
       const data = await res.json();
       if (res.ok) { onBookingSuccess(data.bookingId); }
@@ -175,17 +184,20 @@ export default function BookingForm({ token, onBookingSuccess, onCancel }: Booki
             <span className="ml-auto text-xs opacity-40">{travelDate}</span>
           </div>
           {schedules.map(s => (
-            <button key={s.id} onClick={()=>handleSelectSchedule(s)} className="schedule-card w-full text-left" style={{ background:'var(--color-card-bg)', border:'1.5px solid var(--color-border)' }}>
+            <button key={s._id || s.id} onClick={()=>handleSelectSchedule(s)} className="schedule-card w-full text-left" style={{ background:'var(--color-card-bg)', border:'1.5px solid var(--color-border)' }}>
               <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="font-black text-sm">{s.name}</p>
-                  <p className="text-xs opacity-50">{s.class}</p>
+                <div className="flex items-center gap-2">
+                  {s.photo_url && <img src={s.photo_url} alt={s.name} className="w-10 h-10 rounded-lg object-cover" />}
+                  <div>
+                    <p className="font-black text-sm">{s.name}</p>
+                    <p className="text-xs opacity-50">{s.description || s.plate}</p>
+                  </div>
                 </div>
                 <span className="text-lg font-black" style={{ color:'var(--color-primary)' }}>Rp{(s.price/1000).toFixed(0)}k</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-center">
-                  <p className="text-xl font-black">{s.departure}</p>
+                  <p className="text-xl font-black">{s.departure_time}</p>
                   <p className="text-[10px] opacity-40">{origin}</p>
                 </div>
                 <div className="flex-1 flex flex-col items-center gap-1">
@@ -193,12 +205,12 @@ export default function BookingForm({ token, onBookingSuccess, onCancel }: Booki
                   <p className="text-[9px] opacity-40 font-semibold">{s.duration}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xl font-black">{s.arrival}</p>
+                  <p className="text-xl font-black">{s.arrival_time}</p>
                   <p className="text-[10px] opacity-40">{destination}</p>
                 </div>
               </div>
               <div className="mt-3 pt-2.5 border-t flex items-center justify-between" style={{ borderColor:'var(--color-border)' }}>
-                <span className="text-xs text-green-500 font-semibold">{s.seatsLeft} kursi tersedia</span>
+                <span className="text-xs text-green-500 font-semibold">{(s.seat_layout?.rows || 6) * (s.seat_layout?.columns || 4)} kursi tersedia</span>
                 <span className="text-xs font-bold" style={{ color:'var(--color-primary)' }}>Pilih →</span>
               </div>
             </button>
@@ -229,7 +241,7 @@ export default function BookingForm({ token, onBookingSuccess, onCancel }: Booki
             {passengers[activePassengerIdx].seat && (
               <div className="flex items-center gap-2 p-3 rounded-xl" style={{ background:'var(--color-primary-light)' }}>
                 <Check className="w-4 h-4" style={{ color:'var(--color-primary)' }} />
-                <span className="text-sm font-bold" style={{ color:'var(--color-primary)' }}>Kursi: {passengers[activePassengerIdx].seat?.replace('Gerbong ', 'G')}</span>
+                <span className="text-sm font-bold" style={{ color:'var(--color-primary)' }}>Kursi: {passengers[activePassengerIdx].seat}</span>
               </div>
             )}
           </div>
@@ -238,35 +250,25 @@ export default function BookingForm({ token, onBookingSuccess, onCancel }: Booki
           <div className="card p-4 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold flex items-center gap-1.5"><Armchair className="w-4 h-4" />Pilih Kursi</h3>
-            </div>
-
-            {/* Gerbong selector */}
-            <div className="flex gap-2">
-              {GERBONGS.map(g => (
-                <button key={g} onClick={()=>setSelectedGerbong(g)}
-                  className="flex-1 py-2 text-[10px] font-bold rounded-xl border transition-all"
-                  style={{ borderColor: g===selectedGerbong ? 'var(--color-primary)' : 'var(--color-border)', background: g===selectedGerbong ? 'var(--color-primary-light)' : 'transparent', color: g===selectedGerbong ? 'var(--color-primary)' : 'var(--color-muted)' }}
-                >
-                  {g.replace('Gerbong ','')}
-                </button>
-              ))}
+              <span className="text-[10px] opacity-50">{selectedSchedule.seat_layout?.layout || 'Standard'}</span>
             </div>
 
             {/* Seat grid header */}
-            <div className="grid grid-cols-5 gap-1 text-[9px] font-bold opacity-40 text-center">
+            <div className="grid gap-1 text-[9px] font-bold opacity-40 text-center" style={{ gridTemplateColumns: `repeat(${(selectedSchedule.seat_layout?.columns || 4) + 1}, minmax(0, 1fr))` }}>
               <span></span>
-              {SEAT_LETTERS.map(l=><span key={l}>{l}</span>)}
+              {(selectedSchedule.seat_layout?.labels || ['A','B','C','D']).map((l: string) => <span key={l}>{l}</span>)}
             </div>
 
             {/* Seats */}
             <div className="space-y-1.5">
-              {Array.from({length:TOTAL_ROWS},(_,rowIdx)=>{
+              {Array.from({length: selectedSchedule.seat_layout?.rows || 6},(_,rowIdx)=>{
                 const rowNum = rowIdx+1;
+                const labels = selectedSchedule.seat_layout?.labels || ['A','B','C','D'];
                 return (
-                  <div key={rowNum} className="grid grid-cols-5 gap-1 items-center">
+                  <div key={rowNum} className="grid gap-1 items-center" style={{ gridTemplateColumns: `repeat(${labels.length + 1}, minmax(0, 1fr))` }}>
                     <span className="text-[9px] opacity-40 font-bold text-center">{rowNum}</span>
-                    {SEAT_LETTERS.map(l => {
-                      const seatId = `${selectedGerbong}-${rowNum}${l}`;
+                    {labels.map((l: string) => {
+                      const seatId = `${rowNum}${l}`;
                       const isTaken = occupiedSeats.includes(seatId);
                       const myPassengerIdx = passengers.findIndex(p=>p.seat===seatId);
                       const isMine = myPassengerIdx !== -1;
@@ -307,7 +309,7 @@ export default function BookingForm({ token, onBookingSuccess, onCancel }: Booki
             </h2>
             <div className="flex items-center gap-3">
               <div className="text-center">
-                <p className="text-2xl font-black">{selectedSchedule.departure}</p>
+                <p className="text-2xl font-black">{selectedSchedule.departure_time}</p>
                 <p className="text-xs opacity-50">{origin}</p>
               </div>
               <div className="flex-1 flex flex-col items-center gap-1">
@@ -319,12 +321,12 @@ export default function BookingForm({ token, onBookingSuccess, onCancel }: Booki
                 <p className="text-[10px] opacity-40">{selectedSchedule.duration}</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-black">{selectedSchedule.arrival}</p>
+                <p className="text-2xl font-black">{selectedSchedule.arrival_time}</p>
                 <p className="text-xs opacity-50">{destination}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3 pt-2 border-t" style={{ borderColor:'var(--color-border)' }}>
-              <div><p className="text-[10px] opacity-50">Kelas</p><p className="text-sm font-bold">{selectedSchedule.class}</p></div>
+              <div><p className="text-[10px] opacity-50">Kendaraan</p><p className="text-sm font-bold">{selectedSchedule.name}</p></div>
               <div><p className="text-[10px] opacity-50">Tanggal</p><p className="text-sm font-bold">{travelDate}</p></div>
             </div>
           </div>
@@ -339,7 +341,7 @@ export default function BookingForm({ token, onBookingSuccess, onCancel }: Booki
                   <p className="text-[10px] opacity-40">NIK: {p.nik}</p>
                 </div>
                 <span className="text-xs font-black px-3 py-1 rounded-lg" style={{ background:'var(--color-primary-light)', color:'var(--color-primary)' }}>
-                  {p.seat?.replace('Gerbong ', 'G')?.replace(' ', '')}
+                  {p.seat}
                 </span>
               </div>
             ))}

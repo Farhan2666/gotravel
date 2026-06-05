@@ -16,7 +16,18 @@ export default function DriverPanel({ token, user }: DriverPanelProps) {
   const [lng, setLng] = useState(106.8456);
   const [simStep, setSimStep] = useState(0);
   const [gpsLogs, setGpsLogs] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'orders' | 'active'>('orders');
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [showVehicleForm, setShowVehicleForm] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState<any>(null);
+  const [vehicleForm, setVehicleForm] = useState({
+    name: '', plate: '', description: '',
+    route_from: 'Jakarta', route_to: 'Bandung',
+    price: 0, duration: '',
+    departure_time: '', arrival_time: '',
+    seat_layout: JSON.stringify({ rows: 6, columns: 4, layout: 'standard', labels: ['A','B','C','D'] }),
+    status: 'active', photo_url: ''
+  });
+  const [activeTab, setActiveTab] = useState<'orders' | 'active' | 'vehicles'>('orders');
 
   const addLog = (msg: string) => {
     const time = new Date().toLocaleTimeString();
@@ -49,8 +60,90 @@ export default function DriverPanel({ token, user }: DriverPanelProps) {
     }
   };
 
+  // ── Vehicle Management ──
+  const loadMyVehicles = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API}/vehicles/mine`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) setVehicles(data);
+    } catch (e) {
+      console.error('Failed to load my vehicles', e);
+    }
+  };
+
+  const handleSaveMyVehicle = async () => {
+    if (!token) return;
+    try {
+      const body = {
+        ...vehicleForm,
+        price: Number(vehicleForm.price),
+        seat_layout: JSON.parse(vehicleForm.seat_layout)
+      };
+      const url = editingVehicle ? `${API}/vehicles/${editingVehicle._id}` : `${API}/vehicles`;
+      const res = await fetch(url, {
+        method: editingVehicle ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        setShowVehicleForm(false);
+        setEditingVehicle(null);
+        resetMyVehicleForm();
+        loadMyVehicles();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Gagal menyimpan kendaraan');
+      }
+    } catch {
+      alert('Gagal menghubungi server');
+    }
+  };
+
+  const handleDeleteMyVehicle = async (id: string) => {
+    if (!token) return;
+    if (!confirm('Hapus kendaraan ini?')) return;
+    try {
+      const res = await fetch(`${API}/vehicles/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) loadMyVehicles();
+      else alert('Gagal menghapus kendaraan');
+    } catch {
+      alert('Gagal menghubungi server');
+    }
+  };
+
+  const resetMyVehicleForm = () => {
+    setVehicleForm({
+      name: '', plate: '', description: '',
+      route_from: 'Jakarta', route_to: 'Bandung',
+      price: 0, duration: '',
+      departure_time: '', arrival_time: '',
+      seat_layout: JSON.stringify({ rows: 6, columns: 4, layout: 'standard', labels: ['A','B','C','D'] }),
+      status: 'active', photo_url: ''
+    });
+  };
+
+  const openEditMyVehicle = (v: any) => {
+    setVehicleForm({
+      name: v.name || '', plate: v.plate || '', description: v.description || '',
+      route_from: v.route_from || 'Jakarta', route_to: v.route_to || 'Bandung',
+      price: v.price || 0, duration: v.duration || '',
+      departure_time: v.departure_time || '', arrival_time: v.arrival_time || '',
+      seat_layout: JSON.stringify(v.seat_layout || { rows: 6, columns: 4, layout: 'standard', labels: ['A','B','C','D'] }),
+      status: v.status || 'active', photo_url: v.photo_url || ''
+    });
+    setEditingVehicle(v);
+    setShowVehicleForm(true);
+  };
+
   useEffect(() => {
     loadData();
+    loadMyVehicles();
     const interval = setInterval(loadData, 5000);
     return () => clearInterval(interval);
   }, [token]);
@@ -196,6 +289,13 @@ export default function DriverPanel({ token, user }: DriverPanelProps) {
           >
             Trip Aktif
           </button>
+          <button
+            onClick={() => setActiveTab('vehicles')}
+            className={`px-3 py-1.5 text-xs font-bold rounded-lg border ${activeTab === 'vehicles' ? 'bg-blue-600 border-blue-500 text-white' : ''}`}
+            style={{ borderColor: 'var(--color-border)' }}
+          >
+            Kendaraan Saya ({vehicles.length})
+          </button>
         </div>
       </div>
 
@@ -328,6 +428,89 @@ export default function DriverPanel({ token, user }: DriverPanelProps) {
                 </div>
               </div>
             </>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'vehicles' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold">Kendaraan Saya</h3>
+            <button
+              onClick={() => {
+                resetMyVehicleForm();
+                setEditingVehicle(null);
+                setShowVehicleForm(true);
+              }}
+              className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold"
+            >
+              + Tambah Kendaraan
+            </button>
+          </div>
+
+          {vehicles.length === 0 ? (
+            <div className="p-8 text-center border border-dashed rounded-2xl opacity-60 text-xs" style={{ borderColor: 'var(--color-border)' }}>
+              Anda belum memiliki kendaraan.
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {vehicles.map(v => (
+                <div key={v._id || v.id} className="p-4 rounded-2xl border flex items-center justify-between" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-card-bg)' }}>
+                  <div className="space-y-1">
+                    <p className="font-bold text-sm">{v.name}</p>
+                    <p className="text-xs opacity-60">{v.plate} · {v.route_from} → {v.route_to}</p>
+                    <p className="text-xs font-bold" style={{ color: 'var(--color-primary)' }}>Rp{v.price?.toLocaleString()}</p>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${v.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
+                      {v.status === 'active' ? 'Aktif' : 'Nonaktif'}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => openEditMyVehicle(v)} className="px-3 py-1.5 bg-yellow-500/20 text-yellow-400 rounded-lg text-xs font-bold border border-yellow-500/30">Edit</button>
+                    <button onClick={() => handleDeleteMyVehicle(v._id || v.id)} className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-xs font-bold border border-red-500/30">Hapus</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showVehicleForm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+              <div className="w-full max-w-lg rounded-2xl border p-6 space-y-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: 'var(--color-card-bg)', borderColor: 'var(--color-border)' }}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold">{editingVehicle ? 'Edit Kendaraan' : 'Tambah Kendaraan'}</h3>
+                  <button onClick={() => { setShowVehicleForm(false); setEditingVehicle(null); }} className="text-xs opacity-60 hover:opacity-100">Tutup</button>
+                </div>
+                <div className="space-y-3">
+                  <input className="input-field" placeholder="Nama kendaraan" value={vehicleForm.name} onChange={e => setVehicleForm(f => ({...f, name: e.target.value}))} />
+                  <input className="input-field" placeholder="Nomor plat" value={vehicleForm.plate} onChange={e => setVehicleForm(f => ({...f, plate: e.target.value}))} />
+                  <textarea className="input-field" placeholder="Deskripsi" value={vehicleForm.description} onChange={e => setVehicleForm(f => ({...f, description: e.target.value}))} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <select className="input-field" value={vehicleForm.route_from} onChange={e => setVehicleForm(f => ({...f, route_from: e.target.value}))}>
+                      {['Jakarta','Bandung','Semarang','Yogyakarta','Surabaya'].map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <select className="input-field" value={vehicleForm.route_to} onChange={e => setVehicleForm(f => ({...f, route_to: e.target.value}))}>
+                      {['Jakarta','Bandung','Semarang','Yogyakarta','Surabaya'].map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <input className="input-field" type="number" placeholder="Harga" value={vehicleForm.price} onChange={e => setVehicleForm(f => ({...f, price: Number(e.target.value)}))} />
+                  <input className="input-field" placeholder="Durasi" value={vehicleForm.duration} onChange={e => setVehicleForm(f => ({...f, duration: e.target.value}))} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input className="input-field" type="time" value={vehicleForm.departure_time} onChange={e => setVehicleForm(f => ({...f, departure_time: e.target.value}))} />
+                    <input className="input-field" type="time" value={vehicleForm.arrival_time} onChange={e => setVehicleForm(f => ({...f, arrival_time: e.target.value}))} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input className="input-field" type="number" placeholder="Baris kursi" value={JSON.parse(vehicleForm.seat_layout).rows} onChange={e => setVehicleForm(f => ({...f, seat_layout: JSON.stringify({...JSON.parse(f.seat_layout), rows: Number(e.target.value)})}))} />
+                    <input className="input-field" type="number" placeholder="Kolom kursi" value={JSON.parse(vehicleForm.seat_layout).columns} onChange={e => setVehicleForm(f => ({...f, seat_layout: JSON.stringify({...JSON.parse(f.seat_layout), columns: Number(e.target.value)})}))} />
+                  </div>
+                  <select className="input-field" value={vehicleForm.status} onChange={e => setVehicleForm(f => ({...f, status: e.target.value}))}>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                  <input className="input-field" placeholder="URL Foto" value={vehicleForm.photo_url} onChange={e => setVehicleForm(f => ({...f, photo_url: e.target.value}))} />
+                </div>
+                <button onClick={handleSaveMyVehicle} className="btn-primary w-full">{editingVehicle ? 'Simpan' : 'Tambah'} Kendaraan</button>
+              </div>
+            </div>
           )}
         </div>
       )}

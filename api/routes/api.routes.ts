@@ -12,6 +12,7 @@ import {
   adminGetTransactions
 } from '../controllers/booking.controller';
 import { authMiddleware } from '../middlewares/auth';
+import { addVehicle, listVehicles, getVehicle, editVehicle, removeVehicle, myVehicles } from '../controllers/vehicle.controller';
 
 const router = Router();
 
@@ -40,5 +41,13 @@ router.post('/driver/location', authMiddleware, updateDriverLocation);
 // Admin routes
 router.get('/admin/bookings', authMiddleware, adminGetBookings);
 router.get('/admin/transactions', authMiddleware, adminGetTransactions);
+
+// Vehicle routes
+router.post('/vehicles', authMiddleware, addVehicle);
+router.get('/vehicles', listVehicles);
+router.get('/vehicles/mine', authMiddleware, myVehicles);
+router.get('/vehicles/:id', getVehicle);
+router.put('/vehicles/:id', authMiddleware, editVehicle);
+router.delete('/vehicles/:id', authMiddleware, removeVehicle);
 
 export default router;

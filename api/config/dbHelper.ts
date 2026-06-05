@@ -154,3 +154,60 @@ export async function updateBookingStatus(bookingId: string, status: string) {
   const { data } = await supabase.from('bookings').update({ status }).eq('id', bookingId).select().single();
   return data;
 }
+
+export async function createVehicle(data: any) {
+  const { data: result } = await supabase.from('vehicles').insert(data).select().single();
+  return result;
+}
+
+export async function getAllVehicles() {
+  const { data } = await supabase.from('vehicles').select('*').order('created_at', { ascending: false });
+  return data || [];
+}
+
+export async function getVehicleById(id: string) {
+  const { data } = await supabase.from('vehicles').select('*').eq('id', id).maybeSingle();
+  return data;
+}
+
+export async function updateVehicle(id: string, data: any) {
+  const { data: result } = await supabase.from('vehicles').update(data).eq('id', id).select().single();
+  return result;
+}
+
+export async function deleteVehicle(id: string) {
+  await supabase.from('vehicles').delete().eq('id', id);
+}
+
+export async function getVehiclesByRoute(from: string, to: string) {
+  const { data } = await supabase.from('vehicles').select('*')
+    .eq('route_from', from).eq('route_to', to)
+    .eq('status', 'active')
+    .order('price', { ascending: true });
+  return data || [];
+}
+
+export async function getDriverVehicles(driverId: string) {
+  const { data } = await supabase.from('vehicles').select('*')
+    .eq('driver_id', driverId)
+    .order('created_at', { ascending: false });
+  return data || [];
+}
+
+async function seedVehicles() {
+  const { data: existing } = await supabase.from('vehicles').select('id').limit(1);
+  if (existing && existing.length > 0) return;
+
+  const defaultVehicles = [
+    { name: 'GOtravel Express', plate_number: 'B 1234 ABC', description: 'Bus eksekutif AC, reclining seat, toilet, wifi', route_from: 'Jakarta', route_to: 'Bandung', price: 150000, duration: '2h 30m', departure_time: '08:30', arrival_time: '11:00', seat_layout: { rows: 10, columns: 4, labels: ['A','B','C','D'], layout: 'standard' }, total_seats: 40 },
+    { name: 'GOtravel VIP', plate_number: 'B 5678 DEF', description: 'VIP Super Luxury, seat 2-1, full entertainment', route_from: 'Jakarta', route_to: 'Bandung', price: 225000, duration: '2h 45m', departure_time: '14:15', arrival_time: '17:00', seat_layout: { rows: 6, columns: 3, labels: ['A','B','C'], layout: 'vip' }, total_seats: 18 },
+    { name: 'GOtravel Ekonomi', plate_number: 'B 9012 GHI', description: 'Ekonomi plus nyaman, AC, TV', route_from: 'Jakarta', route_to: 'Bandung', price: 105000, duration: '2h 45m', departure_time: '18:00', arrival_time: '20:45', seat_layout: { rows: 12, columns: 4, labels: ['A','B','C','D'], layout: 'standard' }, total_seats: 48 },
+    { name: 'GOtravel Executive', plate_number: 'B 3456 JKL', description: 'Executive class, bus double deck, toilet', route_from: 'Jakarta', route_to: 'Yogyakarta', price: 400000, duration: '7h 30m', departure_time: '07:00', arrival_time: '14:30', seat_layout: { rows: 8, columns: 4, labels: ['A','B','C','D'], layout: 'standard' }, total_seats: 32 },
+    { name: 'GOtravel Sleeper', plate_number: 'B 7890 MNO', description: 'Sleeper class, bed reclining 180°, premium', route_from: 'Jakarta', route_to: 'Semarang', price: 350000, duration: '6h', departure_time: '21:00', arrival_time: '03:00', seat_layout: { rows: 5, columns: 3, labels: ['A','B','C'], layout: 'sleeper' }, total_seats: 15 },
+  ];
+  for (const v of defaultVehicles) {
+    await supabase.from('vehicles').insert(v);
+  }
+}
+
+setTimeout(seedVehicles, 3000);

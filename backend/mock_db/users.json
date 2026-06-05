@@ -1,0 +1,38 @@
+[
+  {
+    "_id": "6a22205a209c8951f9734129",
+    "name": "Admin GOtravel",
+    "email": "admin@gotravel.com",
+    "password": "$2a$10$vG2AndwDlcZzz3DnV3S8zOC93VxZzcsCfgjDNtMOQ7seNwU/Z6Z1K",
+    "role": "admin",
+    "membership": {
+      "tier": "none",
+      "expiry": null
+    },
+    "createdAt": "2026-06-05T01:03:22.614Z"
+  },
+  {
+    "_id": "6a22205a209c8951f973412a",
+    "name": "Sopir Budi",
+    "email": "driver@gotravel.com",
+    "password": "$2a$10$gfCvm6/usXf4WSS4gUyx/uSFZ2WX4QbxdwAIbzg0u9gV0cbA2wKgu",
+    "role": "driver",
+    "membership": {
+      "tier": "none",
+      "expiry": null
+    },
+    "createdAt": "2026-06-05T01:03:22.616Z"
+  },
+  {
+    "_id": "6a22205a209c8951f973412b",
+    "name": "Farhan",
+    "email": "farhan@example.com",
+    "password": "$2a$10$Cfq.DWV9F/xjyiE6HU2VoedYdmWHSG12VXLQF4ccI.UNDxVUFz.5a",
+    "role": "user",
+    "membership": {
+      "tier": "none",
+      "expiry": null
+    },
+    "createdAt": "2026-06-05T01:03:22.616Z"
+  }
+]

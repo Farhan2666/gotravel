@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "booking_id": "6a22126163b5294776fbb112",
+    "user_id": "6a2210e163b5294776fbb111",
+    "amount": 150000,
+    "status": "completed",
+    "created_at": "2026-06-05T00:03:45.278Z"
+  },
+  {
+    "id": 2,
+    "booking_id": "6a22131763b5294776fbb113",
+    "user_id": "6a2210e163b5294776fbb111",
+    "amount": 150000,
+    "status": "completed",
+    "created_at": "2026-06-05T00:06:47.579Z"
+  },
+  {
+    "id": 3,
+    "booking_id": "6a22154463b5294776fbb114",
+    "user_id": "6a2210e163b5294776fbb111",
+    "amount": 150000,
+    "status": "completed",
+    "created_at": "2026-06-05T00:16:04.245Z"
+  }
+]

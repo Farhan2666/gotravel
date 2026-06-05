@@ -1,0 +1,43 @@
+[
+  {
+    "_id": "6a22126163b5294776fbb112",
+    "userId": "6a2210e163b5294776fbb111",
+    "route": {
+      "from": "Jakarta",
+      "to": "Bandung",
+      "waypoints": []
+    },
+    "vehicleType": "premium_suv",
+    "price": 150000,
+    "status": "confirmed",
+    "createdAt": "2026-06-05T00:03:45.134Z"
+  },
+  {
+    "_id": "6a22131763b5294776fbb113",
+    "userId": "6a2210e163b5294776fbb111",
+    "route": {
+      "from": "Jakarta",
+      "to": "Bandung",
+      "waypoints": []
+    },
+    "vehicleType": "premium_suv",
+    "price": 150000,
+    "status": "confirmed",
+    "createdAt": "2026-06-05T00:06:47.574Z"
+  },
+  {
+    "_id": "6a22154463b5294776fbb114",
+    "userId": "6a2210e163b5294776fbb111",
+    "route": {
+      "from": "Jakarta",
+      "to": "Bandung",
+      "waypoints": [
+        "Gerbong 1-3A"
+      ]
+    },
+    "vehicleType": "GOtravel Express (Eksekutif)",
+    "price": 150000,
+    "status": "confirmed",
+    "createdAt": "2026-06-05T00:16:04.230Z"
+  }
+]
